@@ -1,0 +1,24 @@
+version: '3.6'
+
+services:
+  app:
+    tty: true
+    image: mariohd/my-node-image
+    container_name: node-api
+    environment:
+      MONGO_URI: mongodb://mario:qwerty12345@mongo:27017/matrix?authSource=admin
+    ports:
+      - "80:80"
+    depends_on:
+      - mongo
+  mongo:
+    image: mongo
+    ports:
+      - 27017:27017
+    container_name: mongo
+    restart: always
+    volumes:
+      - ./mongo-data:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=mario
+      - MONGO_INITDB_ROOT_PASSWORD=qwerty12345

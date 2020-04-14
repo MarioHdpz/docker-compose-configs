@@ -1,0 +1,60 @@
+version: '3.7'
+
+services:
+  django:
+    image: mariohd/some-django:latest
+    container_name: django
+    restart: always
+    environment:
+      - BD_SQL=project_db
+      - PASSWORD_SQL=qwerty12345
+      - USER_SQL=mariohd
+      - PORT_SQL=3306
+      - HOST_SQL=mysql
+      - FLASK_HOST=http://flask:3031
+    volumes:
+      - ./media:/app/media
+      - static-content:/app/static
+    depends_on:
+      - mysql
+      - flask
+  flask:
+    # Flask app that runs in port 3031 with some wsgi package
+    image: mariohd/some-flask:latest
+    container_name: flask
+    restart: always
+    environment:
+      - MEDIA_PATH=/
+    volumes:
+      # Uploads files to a madia, that exposes as a volume to share with Django
+      - ./media:/media
+  nginx:
+    # Reverse proxy that also serve static django files
+    image: nginx:alpine
+    container_name: project_nginx
+    restart: always
+    ports:
+      - 80:80
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./media:/usr/share/nginx/media
+      - static-content:/usr/share/nginx/html/static
+    depends_on:
+      - django
+  mysql:
+    image: mysql
+    container_name: project_mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: qwerty12345
+      MYSQL_DATABASE: project
+      MYSQL_USER: mariohd
+      MYSQL_PASSWORD: qwerty12345
+    volumes:
+        # We persist db data in a volume
+        - ./db:/var/lib/mysql
+    command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
+volumes:
+  # Volume for Django static-content
+  static-content:
