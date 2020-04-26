@@ -44,7 +44,6 @@ services:
   mysql:
     image: mysql
     container_name: project_mysql
-    command: --default-authentication-plugin=mysql_native_password
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: qwerty12345
@@ -54,7 +53,7 @@ services:
     volumes:
         # We persist db data in a volume
         - ./db:/var/lib/mysql
-    command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
+    command: ['mysqld', '--default-authentication-plugin=mysql_native_password', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
 volumes:
   # Volume for Django static-content
   static-content:
