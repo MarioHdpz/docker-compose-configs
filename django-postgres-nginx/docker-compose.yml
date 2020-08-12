@@ -1,0 +1,44 @@
+version: '3.7'
+
+services:
+  django:
+    image: mariohd/some-django:latest
+    container_name: django-project
+    restart: always
+    environment:
+      POSTGRES_DB: project_db
+      POSTGRES_USER: mariohd
+      POSTGRES_PASSWORD: qwerty12345
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      LANGUAGE_CODE: es-mx
+    volumes:
+      - ./media:/app/media
+      - static-content:/app/static
+    depends_on:
+      - postgres
+  nginx:
+    image: nginx:alpine
+    container_name: nginx-project
+    restart: always
+    ports:
+      - 80:80
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./media:/usr/share/nginx/media
+      - static-content:/usr/share/nginx/html/static
+    depends_on:
+      - django
+  postgres:
+    container_name: postgres-project
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: qwerty12345
+      POSTGRES_DB: project_db
+      POSTGRES_USER: mariohd
+    volumes:
+        - ./db:/var/lib/postgresql/data
+volumes:
+  # Volume for Django static-content
+  static-content:
